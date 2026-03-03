@@ -1,0 +1,1263 @@
+Telegram Channels List - Generated 2026-03-03T14:44:50.909630
+================================================================================
+
+ID: 1361864897
+Name: (Capi/líderes/leaders)🇬🇧🇮🇳🇧🇷🇮🇹🇪🇸🇹🇷
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1225849752
+Name: International CATS chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1165968089
+Name: CRYPTOTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1524635507
+Name: EstateX Official Community (English)
+Username: @estatexofficial
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1286504167
+Name: Shark Family
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3026661976
+Name: 🦈Puppeteer Mechanics🦈
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1233760509
+Name: BS II - Admin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1118634361
+Name: C.A.T.S.
+Username: @catsgame
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1226127682
+Name: BS II - Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5095493418
+Name: Calibrations Sharksentry Legacy
+Username: (none)
+Type: group
+Members: 2
+----------------------------------------
+ID: 3259442535
+Name: LOG_CHANNEL
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3479191891
+Name: BabySharksPlaybook
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2356966816
+Name: Puppetmasters
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1470174104
+Name: BS IV - Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1485672990
+Name: WayDroid
+Username: @WayDroid
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1337092164
+Name: BS V - Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1545730722
+Name: BS IV - Admin Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3729994073
+Name: COCO-AI
+Username: @CocoAIxyz
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1188584331
+Name: BS3 - WAR
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1507844387
+Name: AdaSwap | $ASW Community
+Username: @adaswapcommunity
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1190515776
+Name: BS3 - CONSIGLIO
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2232931988
+Name: Exilenova+
+Username: @exilenova_plus
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 3468667502
+Name: BS VI - Battle chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3208714172
+Name: BS VI - Admin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2102249410
+Name: LDPlayer MOD
+Username: @BlueLDPlayer
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3772707064
+Name: Brain workspace
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2533824858
+Name: ScrapRun Bot
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1254126552
+Name: BS Sentries
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1221931968
+Name: BS V - Admin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2694778624
+Name: BS3 - Battle log
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1123594280
+Name: Baby Sharks Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3660976608
+Name: 708Sentry
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2435984671
+Name: BS V - Battle Log
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1119354223
+Name: 🦈 BS ADMIN (CATS)🦈
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3254612758
+Name: 708CalibrationTestSentry
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5191273435
+Name: BabySharksPlaybook
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1197297384
+Name: Maythous Calls
+Username: @maythouscalls
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 2495970150
+Name: BS I - Battle Log
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1474573708
+Name: Baby Sharks hotline (BS, BSII, BSIII, BSIV)
+Username: @bscats
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1409413900
+Name: CryptoFury VIE
+Username: @CryptoFuryVN
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5074786186
+Name: Test
+Username: (none)
+Type: group
+Members: 3
+----------------------------------------
+ID: 1173848079
+Name: Nesara Gesara - Secrets
+Username: @NesaraGesaraSecrets
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1498598607
+Name: Daisy Official Channel
+Username: @daisy_global
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 3458915195
+Name: BS IT News Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3798909531
+Name: TESTingmybots
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1498113718
+Name: TRUTHTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2702820366
+Name: BSgangAdmin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1394957978
+Name: C.A.T.S. Gang Recruitment
+Username: @cats_recruit
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1887438817
+Name: BS All Admins
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1978780834
+Name: OUTRA CENA
+Username: @outracena
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1711944292
+Name: Oliver Inu | Official Group
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1737632693
+Name: ✙ △ 200 Russia 300 🤫 🍉
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1689961489
+Name: EstateX Official Announcements
+Username: @EstateXAnnouncement
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 2398030268
+Name: BS Tools 🛠
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1762549306
+Name: Signals only ALTs
+Username: @singalalts
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1775623263
+Name: ElonTine Token 🌹
+Username: @ElonTine
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2323503577
+Name: BabySharks - IT
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3496900283
+Name: BS Alert Superadmin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3626802310
+Name: BS IT News
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1832082311
+Name: BS mechanics
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1155454968
+Name: Papa's Playground
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1506892611
+Name: Moon
+Username: @callsmoon
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5140806567
+Name: Brain workspace
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1224624669
+Name: Telegram Tips
+Username: @TelegramTips
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 3346508179
+Name: TestSentry
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3470113404
+Name: BSVII Battle room
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1313831909
+Name: Infinity Rising
+Username: @infinityrisingx
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1513008438
+Name: Crypto License
+Username: @CryptoLicense_Group
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 4794545691
+Name: TESTingmybots
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 3475069770
+Name: BSVII Admin
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5218583241
+Name: DevCalibrations
+Username: (none)
+Type: group
+Members: 2
+----------------------------------------
+ID: 5295716116
+Name: DevBattleLog
+Username: (none)
+Type: group
+Members: 2
+----------------------------------------
+ID: 3709683039
+Name: DevBattleChat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3738679740
+Name: DevAdminChat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5232650597
+Name: DevBattleChat
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5285174511
+Name: DevAdminChat
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1780731930
+Name: GamePad - Play To Earn⚡ Official Community
+Username: @gamepadofficial
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5123796745
+Name: 708Sentry
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1521061625
+Name: $GREED OFFICIAL$ - Old Chat
+Username: @GREEDOFFICIAL
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3493200122
+Name: AdminTestSentry
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1785404351
+Name: Football World
+Username: @FBW1_NFT
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1600583627
+Name: Lol Hentai the missinng channel
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3476874222
+Name: Red lines Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3264718510
+Name: Red lines Admin Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3401133709
+Name: Red lines
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3462996104
+Name: Red Lines BattleLog
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5045892076
+Name: Red Lines BattleLog
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5001500857
+Name: Red lines Admin Chat
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5081096283
+Name: Red lines Battle Chat
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5028197448
+Name: BSVII Admin
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5057708863
+Name: BSVII Battle room
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4821441366
+Name: BS VI - Admin
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4838146745
+Name: BS VI - Battle chat
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5002137529
+Name: TestSentry
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4999620889
+Name: AdminTestSentry
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 3225790032
+Name: ThreadTestSentry
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 4955142596
+Name: BS Alert Superadmin
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1281268491
+Name: C.A.T.S. Market
+Username: @cats_market
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1500936733
+Name: Urban Universe Token - Nft and Gaming
+Username: @urbanuniverse
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 5071405457
+Name: CalibrationTestSentry
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4742005683
+Name: ThreadTestSentry
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 5060875981
+Name: LOG_CHANNEL
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1211962988
+Name: Meo.tools - Official Main Chat
+Username: @meo_tools
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 4901969020
+Name: 🦈Puppeteer Mechanics🦈
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4883389631
+Name: BS / Anatolian
+Username: (none)
+Type: group
+Members: 6
+----------------------------------------
+ID: 1508576713
+Name: Altar Gardens 🏔 Integral Earthling
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 3011985825
+Name: Passwords / Şifreler
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 4644839977
+Name: Gel 2.0
+Username: (none)
+Type: group
+Members: 4
+----------------------------------------
+ID: 1549725158
+Name: FREEDOMTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2170484031
+Name: Gang Contacts "C.A.T.S" (2.0)
+Username: @gangcontacts2
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1789705874
+Name: Criptoversos 🚀
+Username: @criptoversos
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1615202043
+Name: Crypto Airdrop !
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1605440298
+Name: BS Family alts - Battle Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1692101941
+Name: Gamearound - Community Chat
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2563867311
+Name: BabySharksScrapRunChannel
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 4726072056
+Name: BS3 - Battle log
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4745604592
+Name: BS V Battlelog
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 2643237935
+Name: BS V Battlelog
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 2648050956
+Name: BS V Battle log
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 4792278893
+Name: BS VI - Battle Log
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 2537494129
+Name: BS VI - Battle Log
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1340756091
+Name: BSC MemePad
+Username: @BSCMemePad
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1427966852
+Name: KoGF - BS2
+Username: @kogf_bs2
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 4206994164
+Name: BabySharks - IT
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 2086004624
+Name: groupiing
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 4098166024
+Name: Puppetmasters
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1503554886
+Name: THRIVEVOLUTION
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1628647225
+Name: Matou v2
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1410735520
+Name: TopList Kings of the City C.A.T.S.
+Username: @TopListCityKing
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 4271674093
+Name: BS IT build up upgrade
+Username: (none)
+Type: group
+Members: 1
+----------------------------------------
+ID: 1735294253
+Name: Knight Monster Announcement
+Username: @KnightMonsterAN
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1659924318
+Name: BS_Megashit_event_tracker
+Username: @BS_Megashittracker
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 4120256759
+Name: BS_Megashit_event_tracker
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1111005085
+Name: Calsi Bot Dev
+Username: @CalsiBotDev
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1626946952
+Name: SOULTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1562982166
+Name: Path of Survival
+Username: @PathofSurvival
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1734779998
+Name: SmartScripts by invidtiv
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1897449370
+Name: SmartScript by invidtiv
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1578396353
+Name: ModelSwap
+Username: @ModelSwap_EN
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1558149561
+Name: Microzilla🦖Metaverse 3D NFT
+Username: @MicrozillaOfficial
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 605594330
+Name: Softail
+Username: (none)
+Type: group
+Members: 3
+----------------------------------------
+ID: 4089903811
+Name: groupiing
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 4064846755
+Name: Baby Sharks : set #0
+Username: (none)
+Type: group
+Members: 11
+----------------------------------------
+ID: 1394772438
+Name: KimJongMoon V2 - NFT & Crypto project
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1558089592
+Name: Baby Sharks : set #5
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1374202802
+Name: FREEDOM FAMILIES
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1546755052
+Name: Crypto Announcements
+Username: @SonofFloki_Real
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1792753452
+Name: $MANIA | NFTMANIA.APP "BETA"
+Username: @NFTManiaBSC
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1596992909
+Name: MetAces - No1. Crypto Casino
+Username: @MetAces
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1759203871
+Name: 🌎 MetaBros Official - ReLaunch TBA🌍
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1388245520
+Name: BULLET GAMES
+Username: @bullet_games
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 877066517
+Name: Share
+Username: (none)
+Type: group
+Members: 4
+----------------------------------------
+ID: 834045434
+Name: SmartScripts by invidtiv
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1403202109
+Name: Electro Labs Portal
+Username: @electrolabsofficial
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1605122310
+Name: Matou
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 608629250
+Name: Lol Hentai the missinng channel
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1508385831
+Name: Official Ark Portal
+Username: @officialARK
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1581189927
+Name: BACKSTAGE LIVE🤘🤘🤘
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1416533436
+Name: MetaSims - SCAM - Team rugged
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1507370170
+Name: Ape One Official
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1653022141
+Name: Scooby Inu - Official
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1547682714
+Name: THRIVE COIN - TRVC
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 769398207
+Name: Matou v2
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1737556884
+Name: CUPHEAD | The Official Group
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1367898193
+Name: Mine
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1646914051
+Name: Meta Creators
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1103178180
+Name: TITANS
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1643339163
+Name: PULSEBOMBER - Shutting down. PulseX airdrop compensation(pulseX.com)
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1428843525
+Name: bloXmove Announcements
+Username: @bloXmoveNews
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1591275045
+Name: THRIVE SANCTUARIES
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1611482861
+Name: G.O.A.T Finance - Greatest Of All Time
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1693861393
+Name: Shillit New Project Submitted
+Username: @ShillitNewProjectRequest
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 1549914487
+Name: Ava Husky 🐺
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1580118393
+Name: Solarmine ($SOLAR) - Official Channel
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1506070240
+Name: HEALTHTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1654639047
+Name: MEDIATRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1634060631
+Name: H
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1764042353
+Name: MINDTRIBE
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1360984066
+Name: Deleted
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1791763419
+Name: ggf
+Username: @babysnailcoinofficial
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1720310086
+Name: New Whitelists
+Username: @NewWhitelists
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1504183857
+Name: fail
+Username: @AnubisDogeOfficial
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 761179241
+Name: re:build Costa Rica
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 761777543
+Name: Meta Creators
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1721522823
+Name: ShillitVettingFromsubmissiondiscussion
+Username: @ShillitVettingFromsubmissiondisc
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1792800637
+Name: Shillitt Vettting submission alert
+Username: @ShillitVettingSubmission
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 792704489
+Name: War room 2.0
+Username: (none)
+Type: group
+Members: 4
+----------------------------------------
+ID: 1731679227
+Name: NEWSCOIN THRIVEVOLUTION
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1324678228
+Name: MOONGAME
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 617034284
+Name: ShillitVettingFromsubmissiondiscussion
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1641180681
+Name: Cc
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 658590410
+Name: Safe
+Username: (none)
+Type: group
+Members: 1
+----------------------------------------
+ID: 622941450
+Name: SHILLIT DEFI DEGENS
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 682095194
+Name: TRUTH NEWS
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1573257409
+Name: minechannel
+Username: (none)
+Type: channel
+Members: N/A
+----------------------------------------
+ID: 595928238
+Name: Shillit Posts LIBRARY
+Username: (none)
+Type: group
+Members: 6
+----------------------------------------
+ID: 1665901221
+Name: UNIMOON HAS MOVED ——> t.me/UNIMOONnetwork
+Username: @unimoonshitcoinkilla
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1776415961
+Name: 1
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1730138167
+Name: dfhdh
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 501004751
+Name: Mine
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 1531432810
+Name: 123
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 643026861
+Name: SHILLIT FEEDBACK
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 433974318
+Name: Sell acc
+Username: (none)
+Type: group
+Members: 2
+----------------------------------------
+ID: 1201570680
+Name: AntEx Official
+Username: @AntEx_Project
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 1710961450
+Name: ٴٴ
+Username: (none)
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 514743673
+Name: BACKSTAGE LIVE🤘🤘
+Username: (none)
+Type: group
+Members: 9
+----------------------------------------
+ID: 1316817174
+Name: Meta Spatial - Metaverse Gaming Platform
+Username: @metaspatiaI_officiaI_chat
+Type: supergroup
+Members: N/A
+----------------------------------------
+ID: 400719979
+Name: CRYPTOTRIBE GLOBAL
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 532044803
+Name: URGÊNCIAS MATERIAIS
+Username: (none)
+Type: group
+Members: N/A
+----------------------------------------
+ID: 239852595
+Name: M8ning
+Username: (none)
+Type: group
+Members: 2
+----------------------------------------
