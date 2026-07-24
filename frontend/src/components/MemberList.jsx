@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-function MemberList({ channel, onClose }) {
+function MemberList({ channel, accountId, onClose }) {
   const [members, setMembers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ function MemberList({ channel, onClose }) {
     if (!fetching) return;
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/channels/${channel.id}/members/status`);
+        const response = await fetch(`/api/channels/${channel.id}/members/status?account_id=${encodeURIComponent(accountId)}`);
         if (response.ok) {
           const status = await response.json();
           setFetchStatus(status);
@@ -47,13 +47,13 @@ function MemberList({ channel, onClose }) {
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [fetching, channel.id, loadMembers]);
+  }, [fetching, channel.id, accountId, loadMembers]);
 
   const handleFetchMembers = async () => {
     setFetching(true);
     setFetchStatus({ running: true, message: 'Starting...', total: 0, processed: 0 });
     try {
-      const response = await fetch(`/api/channels/${channel.id}/members/fetch`, {
+      const response = await fetch(`/api/channels/${channel.id}/members/fetch?account_id=${encodeURIComponent(accountId)}`, {
         method: 'POST',
       });
       if (!response.ok) {

@@ -4,11 +4,18 @@ import ChannelList from './components/ChannelList.jsx';
 import TagManager from './components/TagManager.jsx';
 import IngestionPanel from './components/IngestionPanel.jsx';
 import BotRegistry from './components/BotRegistry.jsx';
+import AccountSwitcher from './components/AccountSwitcher.jsx';
 
 function App() {
   const [activeTab, setActiveTab] = useState('channels');
   const [tags, setTags] = useState([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [accounts, setAccounts] = useState([]);
+  const [selectedAccountId, setSelectedAccountId] = useState(
+    () => localStorage.getItem('telegramAccountId') ?? '',
+  );
+  const [pendingBotSyncAccountId, setPendingBotSyncAccountId] = useState('');
+  const [botSyncTrigger, setBotSyncTrigger] = useState(0);
 
   const fetchTags = async () => {
     try {
@@ -25,6 +32,32 @@ function App() {
   useEffect(() => {
     fetchTags();
   }, [refreshTrigger]);
+
+  const fetchAccounts = async (preferredAccountId) => {
+    try {
+      const response = await fetch('/api/telegram-accounts', { cache: 'no-store' });
+      if (!response.ok) return;
+      const data = await response.json();
+      setAccounts(data);
+      const preferred = preferredAccountId ?? selectedAccountId;
+      if (preferred && data.some(account => account.id === preferred)) return;
+      if (preferredAccountId) {
+        setSelectedAccountId(preferredAccountId);
+        localStorage.setItem('telegramAccountId', preferredAccountId);
+      }
+    } catch (error) {
+      console.error('Error fetching Telegram accounts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [refreshTrigger]);
+
+  const selectAccount = (accountId) => {
+    setSelectedAccountId(accountId);
+    localStorage.setItem('telegramAccountId', accountId);
+  };
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -87,14 +120,38 @@ function App() {
       </header>
 
       <main className="app-main">
+        <AccountSwitcher
+          accounts={accounts}
+          selectedAccountId={selectedAccountId}
+          onSelect={selectAccount}
+          onAccountCreated={async account => {
+            selectAccount(account.id);
+            await fetchAccounts(account.id);
+            setActiveTab('ingest');
+          }}
+          onAccountUpdated={async account => {
+            await fetchAccounts(account.id);
+          }}
+        />
         {activeTab === 'channels' && (
           <ChannelList
             tags={tags}
             onTagsChange={handleRefresh}
+            selectedAccountId={selectedAccountId}
           />
         )}
         {activeTab === 'bots' && (
-          <BotRegistry />
+          <BotRegistry
+            selectedAccountId={selectedAccountId}
+            selectedAccount={accounts.find(account => account.id === selectedAccountId)}
+            onAccountsChange={fetchAccounts}
+            syncTrigger={botSyncTrigger}
+            onAuthRequired={accountId => {
+              setPendingBotSyncAccountId(accountId);
+              setActiveTab('ingest');
+            }}
+            onSyncTriggerConsumed={() => setBotSyncTrigger(0)}
+          />
         )}
         {activeTab === 'tags' && (
           <TagManager
@@ -103,7 +160,19 @@ function App() {
           />
         )}
         {activeTab === 'ingest' && (
-          <IngestionPanel onIngestionComplete={handleRefresh} />
+          <IngestionPanel
+            onIngestionComplete={handleRefresh}
+            selectedAccountId={selectedAccountId}
+            selectedAccount={accounts.find(account => account.id === selectedAccountId)}
+            onAccountsChange={fetchAccounts}
+            onAuthorized={() => {
+              if (pendingBotSyncAccountId === selectedAccountId) {
+                setPendingBotSyncAccountId('');
+                setBotSyncTrigger(trigger => trigger + 1);
+                setActiveTab('bots');
+              }
+            }}
+          />
         )}
       </main>
     </div>

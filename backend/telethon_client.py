@@ -16,37 +16,55 @@ from telethon.tl.types import (
 from telethon.tl.functions.messages import GetFullChatRequest
 from telethon.errors import FloodWaitError, RPCError, ChatAdminRequiredError
 
-from models import Channel as ChannelModel, GroupMember
+from models import Channel as ChannelModel, ChannelAccount, GroupMember, TelegramAccount
 
 
 telegram_session_lock = asyncio.Lock()
+_session_locks: dict[str, asyncio.Lock] = {}
 
 
-def get_telegram_session_path() -> str:
+def get_telegram_session_path(session_name: str | None = None) -> str:
     """Return the configured Telethon session path."""
-    session_name = os.getenv('SESSION_NAME', 'list_channels_session')
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), session_name)
+    session_name = session_name or os.getenv('SESSION_NAME', 'list_channels_session')
+    if session_name == os.getenv('SESSION_NAME', 'list_channels_session'):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), session_name)
+    if not session_name.startswith("account_") or not session_name.replace("_", "").isalnum():
+        raise RuntimeError("Invalid Telegram session identifier")
+    session_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "sessions")
+    os.makedirs(session_dir, mode=0o700, exist_ok=True)
+    return os.path.join(session_dir, session_name)
 
 
-def create_telegram_client() -> TelegramClient:
+def create_telegram_client(session_name: str | None = None) -> TelegramClient:
     """Create a Telegram client using server-side credentials and session storage."""
     api_id = os.getenv('TELEGRAM_API_ID')
     api_hash = os.getenv('TELEGRAM_API_HASH')
     if not api_id or not api_hash:
         raise RuntimeError("Telegram API credentials are not configured")
-    return TelegramClient(get_telegram_session_path(), int(api_id), api_hash)
+    return TelegramClient(get_telegram_session_path(session_name), int(api_id), api_hash)
+
+
+def get_session_lock(session_name: str | None = None) -> asyncio.Lock:
+    """Return a process-local lock for one session file."""
+    key = session_name or os.getenv('SESSION_NAME', 'list_channels_session')
+    if key == os.getenv('SESSION_NAME', 'list_channels_session'):
+        return telegram_session_lock
+    return _session_locks.setdefault(key, asyncio.Lock())
 
 
 class TelegramIngestion:
     """Handles ingestion of Telegram channels into the database."""
     
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, account_id: str = "default", session_name: str | None = None):
         self.db = db
-        self.client = create_telegram_client()
+        self.account_id = account_id
+        self.session_name = session_name
+        self.client = create_telegram_client(session_name)
+        self.session_lock = get_session_lock(session_name)
 
     async def run_ingestion(self, status_dict: Dict[str, Any]) -> Dict[str, int]:
         """Run ingestion while holding exclusive access to the session file."""
-        async with telegram_session_lock:
+        async with self.session_lock:
             return await self._run_ingestion_locked(status_dict)
 
     async def _run_ingestion_locked(self, status_dict: Dict[str, Any]) -> Dict[str, int]:
@@ -73,9 +91,11 @@ class TelegramIngestion:
             
             added = 0
             updated = 0
+            seen_channel_ids = set()
             
             for dialog in channel_dialogs:
                 entity = dialog.entity
+                seen_channel_ids.add(entity.id)
                 status_dict["message"] = f"Processing: {dialog.name}"
                 
                 # Calculate bot_chat_id
@@ -123,6 +143,22 @@ class TelegramIngestion:
                     )
                     self.db.add(new_channel)
                     added += 1
+
+                link_result = await self.db.execute(
+                    select(ChannelAccount).where(
+                        ChannelAccount.account_id == self.account_id,
+                        ChannelAccount.channel_id == entity.id,
+                    )
+                )
+                link = link_result.scalar_one_or_none()
+                if link:
+                    link.last_seen_at = datetime.utcnow()
+                else:
+                    self.db.add(ChannelAccount(
+                        account_id=self.account_id,
+                        channel_id=entity.id,
+                        last_seen_at=datetime.utcnow(),
+                    ))
                 
                 status_dict["processed"] += 1
                 
@@ -134,6 +170,18 @@ class TelegramIngestion:
                 await asyncio.sleep(0.2)
             
             # Final commit
+            stale_links = await self.db.execute(
+                select(ChannelAccount).where(ChannelAccount.account_id == self.account_id)
+            )
+            for link in stale_links.scalars().all():
+                if link.channel_id not in seen_channel_ids:
+                    await self.db.delete(link)
+            account_result = await self.db.execute(
+                select(TelegramAccount).where(TelegramAccount.id == self.account_id)
+            )
+            account = account_result.scalar_one_or_none()
+            if account:
+                account.last_channel_scan_at = datetime.utcnow()
             await self.db.commit()
             
             return {
@@ -169,7 +217,7 @@ class TelegramIngestion:
 
     async def fetch_members(self, channel_id: int, status_dict: Dict[str, Any]) -> Dict[str, int]:
         """Fetch members while holding exclusive access to the session file."""
-        async with telegram_session_lock:
+        async with self.session_lock:
             return await self._fetch_members_locked(channel_id, status_dict)
 
     async def _fetch_members_locked(self, channel_id: int, status_dict: Dict[str, Any]) -> Dict[str, int]:

@@ -1850,3 +1850,99 @@ textarea {
   display: flex;
   gap: var(--space-sm);
 }
+
+/* ===== Telegram accounts ===== */
+.account-switcher {
+  margin-bottom: var(--space-lg);
+}
+
+.account-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.account-pill,
+.account-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.account-pill:hover,
+.account-pill.active {
+  color: var(--text-primary);
+  border-color: var(--brand-primary);
+}
+
+.account-pill.active {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.account-add-button {
+  margin-left: auto;
+  color: var(--brand-primary);
+}
+
+.account-auth-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+}
+
+.account-auth-dot.connected {
+  background: var(--success);
+}
+
+.account-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.token-needed-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(245, 158, 11, 0.16);
+  color: var(--warning);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.account-modal {
+  max-width: 460px;
+}
+
+@media (max-width: 640px) {
+  .account-add-button {
+    margin-left: 0;
+  }
+}

@@ -7,7 +7,13 @@ const initialAuthStatus = {
   expires_in: null,
 };
 
-function IngestionPanel({ onIngestionComplete }) {
+function IngestionPanel({
+  onIngestionComplete,
+  selectedAccountId,
+  selectedAccount,
+  onAccountsChange,
+  onAuthorized,
+}) {
   const [status, setStatus] = useState({
     running: false,
     total: 0,
@@ -23,8 +29,9 @@ function IngestionPanel({ onIngestionComplete }) {
   const [password, setPassword] = useState('');
 
   const fetchStatus = useCallback(async () => {
+    if (!selectedAccountId) return null;
     try {
-      const response = await fetch('/api/ingestion/status');
+      const response = await fetch(`/api/ingestion/status?account_id=${encodeURIComponent(selectedAccountId)}`);
       if (response.ok) {
         const data = await response.json();
         setStatus(data);
@@ -34,11 +41,22 @@ function IngestionPanel({ onIngestionComplete }) {
       console.error('Error fetching status:', error);
     }
     return null;
-  }, []);
+  }, [selectedAccountId]);
 
   const fetchAuthStatus = useCallback(async () => {
+    if (!selectedAccountId) {
+      setAuthStatus({
+        authorized: false,
+        state: 'account_required',
+        message: 'Select one Telegram account above.',
+        expires_in: null,
+      });
+      return null;
+    }
     try {
-      const response = await fetch('/api/telegram-auth/status');
+      const response = await fetch(`/api/telegram-accounts/${selectedAccountId}/auth/status`, {
+        cache: 'no-store',
+      });
       const data = await response.json();
       if (!response.ok) {
         const detail = data.detail;
@@ -61,7 +79,7 @@ function IngestionPanel({ onIngestionComplete }) {
       setAuthError(error.message || 'Could not check Telegram authorization');
       return null;
     }
-  }, []);
+  }, [selectedAccountId]);
 
   useEffect(() => {
     fetchStatus();
@@ -89,7 +107,7 @@ function IngestionPanel({ onIngestionComplete }) {
     setAuthSubmitting(true);
     setAuthError('');
     try {
-      const response = await fetch(`/api/telegram-auth/${path}`, {
+      const response = await fetch(`/api/telegram-accounts/${selectedAccountId}/auth/${path}`, {
         method: 'POST',
         headers: body ? { 'Content-Type': 'application/json' } : undefined,
         body: body ? JSON.stringify(body) : undefined,
@@ -108,6 +126,8 @@ function IngestionPanel({ onIngestionComplete }) {
         setPhone('');
         setCode('');
         setPassword('');
+        await onAccountsChange?.(selectedAccountId);
+        onAuthorized?.();
       }
       return data;
     } catch (error) {
@@ -154,7 +174,7 @@ function IngestionPanel({ onIngestionComplete }) {
         return;
       }
 
-      const response = await fetch('/api/ingestion/start', {
+      const response = await fetch(`/api/ingestion/start?account_id=${encodeURIComponent(selectedAccountId)}`, {
         method: 'POST',
       });
 
@@ -202,6 +222,9 @@ function IngestionPanel({ onIngestionComplete }) {
     : 0;
 
   const renderAuthorization = () => {
+    if (!selectedAccountId) {
+      return <p className="telegram-auth-help">Choose an account above, or create a new one.</p>;
+    }
     if (authStatus.state === 'checking') {
       return <p className="telegram-auth-help">Checking the persisted Telegram session…</p>;
     }
@@ -334,7 +357,9 @@ function IngestionPanel({ onIngestionComplete }) {
         <div className="telegram-auth-heading">
           <div>
             <span className="telegram-auth-eyebrow">Account connection</span>
-            <h3 id="telegram-auth-heading">Telegram session</h3>
+            <h3 id="telegram-auth-heading">
+              {selectedAccount ? `${selectedAccount.label} Telegram session` : 'Telegram session'}
+            </h3>
           </div>
           {!authStatus.authorized && authStatus.state !== 'checking' && (
             <button

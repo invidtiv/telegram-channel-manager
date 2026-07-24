@@ -23,13 +23,18 @@ from sqlalchemy.orm import selectinload
 sys.path.insert(0, os.path.dirname(__file__))
 
 from database import init_db, get_db, AsyncSessionLocal
-from models import Channel, Tag, channel_tags, GroupMember, Bot, BotCommand, BotHistory, ScanRun, TokenOccurrence
+from models import (
+    Channel, ChannelAccount, Tag, TelegramAccount, BotAccount, channel_tags,
+    GroupMember, Bot, BotCommand, BotHistory, ScanRun, TokenOccurrence,
+)
 from schemas import (
     ChannelCreate, ChannelResponse, ChannelUpdate,
     TagCreate, TagResponse, TagUpdate,
     IngestionResponse, ChannelFilter,
     TelegramPhoneRequest, TelegramCodeRequest, TelegramPasswordRequest,
     TelegramAuthCancelRequest, TelegramAuthStatusResponse,
+    TelegramAccountCreate, TelegramAccountUpdate, TelegramAccountResponse,
+    TelegramBotSyncResponse,
     MemberResponse, MemberFetchResponse,
     BotCreate, BotResponse, BotUpdate,
     BotCommandCreate, BotCommandResponse,
@@ -37,8 +42,9 @@ from schemas import (
     ScanInventory, ScanRequest, ScanRunResponse,
     BotAssignRequest,
 )
-from telethon_client import TelegramIngestion
+from telethon_client import TelegramIngestion, create_telegram_client, get_session_lock
 from telegram_auth import TelegramAuthError, TelegramAuthManager
+from telegram_bot_sync import TelegramAuthorizationRequired, TelegramBotSync
 from scanner import run_scan, resync_inventory
 from botfather_parser import parse_botfather_history
 
@@ -78,7 +84,11 @@ app.add_middleware(
 async def disable_telegram_auth_caching(request: Request, call_next):
     """Keep authorization state and responses out of browser/proxy caches."""
     response = await call_next(request)
-    if request.url.path.startswith("/api/telegram-auth/"):
+    if (
+        request.url.path.startswith("/api/telegram-auth/")
+        or request.url.path.startswith("/api/telegram-accounts")
+        or "/auth/" in request.url.path
+    ):
         response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -89,7 +99,7 @@ async def redact_telegram_auth_validation_errors(
     error: RequestValidationError,
 ):
     """Avoid echoing phone, code, or password values in validation responses."""
-    if request.url.path.startswith("/api/telegram-auth/"):
+    if request.url.path.startswith("/api/telegram-auth/") or "/auth/" in request.url.path:
         return JSONResponse(
             status_code=422,
             content={
@@ -110,15 +120,47 @@ def _search_tokens(search: str) -> List[str]:
     return [token.strip() for token in search.split() if token.strip()]
 
 
+def _account_badge(account: TelegramAccount) -> dict:
+    return {
+        "id": account.id,
+        "label": account.label,
+        "country_code": account.country_code or "",
+    }
+
+
+def _channel_to_response(channel: Channel) -> dict:
+    return {
+        "id": channel.id,
+        "bot_chat_id": channel.bot_chat_id,
+        "name": channel.name,
+        "username": channel.username,
+        "type": channel.type,
+        "participants_count": channel.participants_count,
+        "is_verified": channel.is_verified,
+        "is_megagroup": channel.is_megagroup,
+        "about": channel.about,
+        "created_at": channel.created_at,
+        "updated_at": channel.updated_at,
+        "tags": channel.tags,
+        "accounts": [_account_badge(link.account) for link in channel.account_links],
+    }
+
+
 @app.get("/api/channels", response_model=List[ChannelResponse])
 async def get_channels(
     tag_ids: Optional[str] = None,
     search: Optional[str] = None,
     channel_type: Optional[str] = None,
+    account_id: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """Get all channels with optional filtering."""
-    query = select(Channel).options(selectinload(Channel.tags))
+    query = select(Channel).options(
+        selectinload(Channel.tags),
+        selectinload(Channel.account_links).selectinload(ChannelAccount.account),
+    )
+    if account_id:
+        query = query.join(ChannelAccount).where(ChannelAccount.account_id == account_id)
     
     # Filter by tag IDs
     if tag_ids:
@@ -148,20 +190,23 @@ async def get_channels(
     query = query.order_by(Channel.name)
     result = await db.execute(query)
     channels = result.scalars().unique().all()
-    return channels
+    return [_channel_to_response(channel) for channel in channels]
 
 
 @app.get("/api/channels/{channel_id}", response_model=ChannelResponse)
 async def get_channel(channel_id: int, db: AsyncSession = Depends(get_db)):
     """Get a single channel by ID."""
-    query = select(Channel).options(selectinload(Channel.tags)).where(Channel.id == channel_id)
+    query = select(Channel).options(
+        selectinload(Channel.tags),
+        selectinload(Channel.account_links).selectinload(ChannelAccount.account),
+    ).where(Channel.id == channel_id)
     result = await db.execute(query)
     channel = result.scalar_one_or_none()
     
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
     
-    return channel
+    return _channel_to_response(channel)
 
 
 @app.put("/api/channels/{channel_id}", response_model=ChannelResponse)
@@ -191,9 +236,12 @@ async def update_channel(
     await db.refresh(channel)
     
     # Reload with tags
-    query = select(Channel).options(selectinload(Channel.tags)).where(Channel.id == channel_id)
+    query = select(Channel).options(
+        selectinload(Channel.tags),
+        selectinload(Channel.account_links).selectinload(ChannelAccount.account),
+    ).where(Channel.id == channel_id)
     result = await db.execute(query)
-    return result.scalar_one()
+    return _channel_to_response(result.scalar_one())
 
 
 @app.post("/api/channels/{channel_id}/tags/{tag_id}")
@@ -319,6 +367,14 @@ async def delete_tag(tag_id: int, db: AsyncSession = Depends(get_db)):
 TOKEN_REGEX = r'[0-9]{8,10}:[A-Za-z0-9_-]{35}'
 
 
+def _telegram_bot_id_from_token(token: str) -> Optional[int]:
+    """Extract the public bot identity without retaining or exposing the secret."""
+    prefix, separator, secret = (token or "").strip().partition(":")
+    if not separator or not prefix.isdigit() or not secret:
+        return None
+    return int(prefix)
+
+
 def _default_settings():
     return {
         "privacy_mode": True,
@@ -357,7 +413,7 @@ def _bot_to_response(bot: Bot) -> dict:
     """Convert a Bot ORM instance to a dict matching BotResponse."""
     return {
         "id": bot.id,
-        "token": bot.token,
+        "telegram_bot_id": bot.telegram_bot_id,
         "username": bot.username,
         "display_name": bot.display_name,
         "description": bot.description,
@@ -371,6 +427,9 @@ def _bot_to_response(bot: Bot) -> dict:
         "location": bot.location,
         "notes": bot.notes,
         "settings": _settings_from_db(bot.settings),
+        "has_token": bool(bot.token),
+        "token_preview": f"{bot.token.split(':', 1)[0]}:••••••••" if bot.token else "",
+        "accounts": [_account_badge(link.account) for link in bot.account_links],
         "created_at": bot.created_at,
         "updated_at": bot.updated_at,
         "commands": [
@@ -389,13 +448,25 @@ def _bot_to_response(bot: Bot) -> dict:
                 "timestamp": h.timestamp,
                 "action": h.action,
                 "field": h.field,
-                "old_value": h.old_value,
-                "new_value": h.new_value,
+                "old_value": (
+                    "configured" if h.field == "token" and h.old_value else h.old_value
+                ),
+                "new_value": (
+                    "configured" if h.field == "token" and h.new_value else h.new_value
+                ),
                 "note": h.note,
             }
             for h in bot.history
         ],
     }
+
+
+def _bot_query():
+    return select(Bot).options(
+        selectinload(Bot.commands),
+        selectinload(Bot.history),
+        selectinload(Bot.account_links).selectinload(BotAccount.account),
+    )
 
 
 async def _log_history(db: AsyncSession, bot_id: str, action: str, field: str, new_value, old_value=None, note=None):
@@ -618,7 +689,7 @@ async def run_scan_task(mode: str):
 
 @app.post("/api/bots/assign", response_model=BotResponse)
 async def assign_token_to_bot(request: BotAssignRequest, db: AsyncSession = Depends(get_db)):
-    """Create a new Bot registry entry from an unassigned found token."""
+    """Fill a tokenless bot when possible, otherwise create a registry entry."""
     # Find the most recent occurrence with this fingerprint to get the token
     result = await db.execute(
         select(TokenOccurrence)
@@ -638,9 +709,51 @@ async def assign_token_to_bot(request: BotAssignRequest, db: AsyncSession = Depe
         raise HTTPException(status_code=409, detail="A bot with this token already exists")
 
     now = datetime.utcnow()
+    telegram_bot_id = int(occurrence.bot_id)
+    tokenless_result = await db.execute(
+        select(Bot).where(
+            Bot.telegram_bot_id == telegram_bot_id,
+            Bot.token == "",
+        ).limit(1)
+    )
+    tokenless_bot = tokenless_result.scalar_one_or_none()
+    if tokenless_bot:
+        tokenless_bot.token = occurrence.token
+        tokenless_bot.project = request.project
+        tokenless_bot.environment = request.environment
+        if request.username:
+            tokenless_bot.username = request.username
+        if request.display_name:
+            tokenless_bot.display_name = request.display_name
+        if request.notes:
+            tokenless_bot.notes = request.notes
+        tokenless_bot.updated_at = now
+        await _log_history(
+            db,
+            tokenless_bot.id,
+            "updated",
+            "token",
+            True,
+            False,
+            note=f"Filled from scan source: {occurrence.source_label}",
+        )
+        await db.commit()
+        result = await db.execute(_bot_query().where(Bot.id == tokenless_bot.id))
+        return _bot_to_response(result.scalar_one())
+
+    identity_result = await db.execute(
+        select(Bot).where(Bot.telegram_bot_id == telegram_bot_id).limit(1)
+    )
+    if identity_result.scalar_one_or_none():
+        raise HTTPException(
+            status_code=409,
+            detail="This Telegram bot already has a different stored token. Edit that bot to rotate it.",
+        )
+
     bot_id = str(uuid.uuid4())
     bot = Bot(
         id=bot_id,
+        telegram_bot_id=telegram_bot_id,
         token=occurrence.token,
         username=request.username or occurrence.bot_id,
         display_name=request.display_name or request.username or occurrence.bot_id,
@@ -679,7 +792,7 @@ async def assign_token_to_bot(request: BotAssignRequest, db: AsyncSession = Depe
     await db.commit()
 
     result = await db.execute(
-        select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history)).where(Bot.id == bot_id)
+        _bot_query().where(Bot.id == bot_id)
     )
     bot = result.scalar_one()
     return _bot_to_response(bot)
@@ -692,10 +805,13 @@ async def get_bots(
     environment: Optional[str] = None,
     status: Optional[str] = None,
     tag: Optional[str] = None,
+    account_id: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
     """Get all bot registry entries with optional filtering."""
-    query = select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history))
+    query = _bot_query()
+    if account_id:
+        query = query.join(BotAccount).where(BotAccount.account_id == account_id)
 
     if search:
         pattern = f"%{search}%"
@@ -722,7 +838,7 @@ async def get_bots(
 @app.get("/api/bots/{bot_id}", response_model=BotResponse)
 async def get_bot(bot_id: str, db: AsyncSession = Depends(get_db)):
     """Get a single bot by ID."""
-    query = select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history)).where(Bot.id == bot_id)
+    query = _bot_query().where(Bot.id == bot_id)
     result = await db.execute(query)
     bot = result.scalar_one_or_none()
     if not bot:
@@ -736,10 +852,24 @@ async def create_bot(bot_data: BotCreate, db: AsyncSession = Depends(get_db)):
     now = datetime.utcnow()
     bot_id = str(uuid.uuid4())
     settings_db = _settings_to_db(bot_data.settings)
+    token = (bot_data.token or "").strip()
+    telegram_bot_id = _telegram_bot_id_from_token(token) if token else None
+    if token and telegram_bot_id is None:
+        raise HTTPException(status_code=400, detail="Invalid Telegram bot token format")
+    if telegram_bot_id is not None:
+        existing_identity = await db.execute(
+            select(Bot).where(Bot.telegram_bot_id == telegram_bot_id).limit(1)
+        )
+        if existing_identity.scalar_one_or_none():
+            raise HTTPException(
+                status_code=409,
+                detail="This Telegram bot already exists. Edit its registry row instead.",
+            )
 
     bot = Bot(
         id=bot_id,
-        token=bot_data.token,
+        token=token,
+        telegram_bot_id=telegram_bot_id,
         username=bot_data.username,
         display_name=bot_data.display_name or bot_data.username,
         description=bot_data.description,
@@ -773,7 +903,7 @@ async def create_bot(bot_data: BotCreate, db: AsyncSession = Depends(get_db)):
     await db.refresh(bot)
     # Re-fetch with eager-loaded relationships to avoid lazy-loading in async mode
     result = await db.execute(
-        select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history)).where(Bot.id == bot_id)
+        _bot_query().where(Bot.id == bot_id)
     )
     bot = result.scalar_one()
     return _bot_to_response(bot)
@@ -782,7 +912,7 @@ async def create_bot(bot_data: BotCreate, db: AsyncSession = Depends(get_db)):
 @app.put("/api/bots/{bot_id}", response_model=BotResponse)
 async def update_bot(bot_id: str, update_data: BotUpdate, db: AsyncSession = Depends(get_db)):
     """Update a bot registry entry."""
-    query = select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history)).where(Bot.id == bot_id)
+    query = _bot_query().where(Bot.id == bot_id)
     result = await db.execute(query)
     bot = result.scalar_one_or_none()
     if not bot:
@@ -794,9 +924,34 @@ async def update_bot(bot_id: str, update_data: BotUpdate, db: AsyncSession = Dep
     ]
     for field in fields:
         value = getattr(update_data, field, None)
-        if value is not None:
+        if value is not None and not (field == "token" and value == ""):
+            if field == "token":
+                value = value.strip()
+                token_bot_id = _telegram_bot_id_from_token(value)
+                if token_bot_id is None:
+                    raise HTTPException(status_code=400, detail="Invalid Telegram bot token format")
+                if bot.telegram_bot_id is not None and token_bot_id != bot.telegram_bot_id:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="This token belongs to a different Telegram bot.",
+                    )
+                if bot.telegram_bot_id is None:
+                    existing_identity = await db.execute(
+                        select(Bot).where(
+                            Bot.telegram_bot_id == token_bot_id,
+                            Bot.id != bot.id,
+                        ).limit(1)
+                    )
+                    if existing_identity.scalar_one_or_none():
+                        raise HTTPException(
+                            status_code=409,
+                            detail="This token belongs to another registry bot.",
+                        )
+                    bot.telegram_bot_id = token_bot_id
             old = getattr(bot, field)
-            await _log_history(db, bot_id, "updated", field, value, old)
+            history_value = bool(value) if field == "token" else value
+            history_old = bool(old) if field == "token" else old
+            await _log_history(db, bot_id, "updated", field, history_value, history_old)
             setattr(bot, field, value)
 
     if update_data.settings is not None:
@@ -820,7 +975,7 @@ async def update_bot(bot_id: str, update_data: BotUpdate, db: AsyncSession = Dep
     await db.refresh(bot)
     # Re-fetch with eager-loaded relationships to avoid lazy-loading in async mode
     result = await db.execute(
-        select(Bot).options(selectinload(Bot.commands), selectinload(Bot.history)).where(Bot.id == bot_id)
+        _bot_query().where(Bot.id == bot_id)
     )
     bot = result.scalar_one()
     return _bot_to_response(bot)
@@ -839,7 +994,202 @@ async def delete_bot(bot_id: str, db: AsyncSession = Depends(get_db)):
     return {"message": "Bot deleted"}
 
 
-# ============== Ingestion Endpoints ==============
+# ============== Telegram Accounts and Authorization ==============
+
+telegram_auth_managers: dict[str, TelegramAuthManager] = {}
+
+
+async def _get_telegram_account(db: AsyncSession, account_id: str) -> TelegramAccount:
+    result = await db.execute(
+        select(TelegramAccount).where(TelegramAccount.id == account_id)
+    )
+    account = result.scalar_one_or_none()
+    if not account:
+        raise HTTPException(status_code=404, detail="Telegram account not found")
+    return account
+
+
+def _auth_manager_for(account: TelegramAccount) -> TelegramAuthManager:
+    manager = telegram_auth_managers.get(account.id)
+    if manager is None:
+        session_name = account.session_name
+        manager = TelegramAuthManager(
+            client_factory=lambda: create_telegram_client(session_name),
+            lock=get_session_lock(session_name),
+        )
+        telegram_auth_managers[account.id] = manager
+    return manager
+
+
+async def _account_to_response(account: TelegramAccount) -> dict:
+    authorized = False
+    try:
+        authorized = (await _auth_manager_for(account).get_status())["authorized"]
+    except TelegramAuthError:
+        pass
+    return {
+        "id": account.id,
+        "label": account.label,
+        "country_code": account.country_code or "",
+        "phone_hint": account.phone_hint or "",
+        "telegram_user_id": account.telegram_user_id,
+        "username": account.username,
+        "display_name": account.display_name or "",
+        "is_default": account.is_default,
+        "authorized": authorized,
+        "last_channel_scan_at": account.last_channel_scan_at,
+        "last_bot_scan_at": account.last_bot_scan_at,
+        "created_at": account.created_at,
+    }
+
+
+@app.get("/api/telegram-accounts", response_model=List[TelegramAccountResponse])
+async def get_telegram_accounts(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(TelegramAccount).order_by(TelegramAccount.is_default.desc(), TelegramAccount.created_at)
+    )
+    return [await _account_to_response(account) for account in result.scalars().all()]
+
+
+@app.post("/api/telegram-accounts", response_model=TelegramAccountResponse)
+async def create_telegram_account(
+    payload: TelegramAccountCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    account_id = str(uuid.uuid4())
+    account = TelegramAccount(
+        id=account_id,
+        label=payload.label,
+        country_code=payload.country_code,
+        session_name=f"account_{account_id.replace('-', '')}",
+        is_default=False,
+    )
+    db.add(account)
+    await db.commit()
+    await db.refresh(account)
+    return await _account_to_response(account)
+
+
+@app.put("/api/telegram-accounts/{account_id}", response_model=TelegramAccountResponse)
+async def update_telegram_account(
+    account_id: str,
+    payload: TelegramAccountUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    account = await _get_telegram_account(db, account_id)
+    if payload.label is not None:
+        account.label = payload.label
+    if payload.country_code is not None:
+        account.country_code = payload.country_code
+    account.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(account)
+    return await _account_to_response(account)
+
+
+@app.get(
+    "/api/telegram-accounts/{account_id}/auth/status",
+    response_model=TelegramAuthStatusResponse,
+)
+async def get_account_auth_status(account_id: str, db: AsyncSession = Depends(get_db)):
+    account = await _get_telegram_account(db, account_id)
+    try:
+        return await _auth_manager_for(account).get_status()
+    except TelegramAuthError as error:
+        _raise_telegram_auth_error(error)
+
+
+@app.post(
+    "/api/telegram-accounts/{account_id}/auth/request-code",
+    response_model=TelegramAuthStatusResponse,
+)
+async def request_account_auth_code(
+    account_id: str,
+    payload: TelegramPhoneRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    account = await _get_telegram_account(db, account_id)
+    try:
+        return await _auth_manager_for(account).request_code(payload.phone)
+    except TelegramAuthError as error:
+        _raise_telegram_auth_error(error)
+
+
+@app.post(
+    "/api/telegram-accounts/{account_id}/auth/submit-code",
+    response_model=TelegramAuthStatusResponse,
+)
+async def submit_account_auth_code(
+    account_id: str,
+    payload: TelegramCodeRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    account = await _get_telegram_account(db, account_id)
+    try:
+        return await _auth_manager_for(account).submit_code(payload.code)
+    except TelegramAuthError as error:
+        _raise_telegram_auth_error(error)
+
+
+@app.post(
+    "/api/telegram-accounts/{account_id}/auth/submit-password",
+    response_model=TelegramAuthStatusResponse,
+)
+async def submit_account_auth_password(
+    account_id: str,
+    payload: TelegramPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    account = await _get_telegram_account(db, account_id)
+    try:
+        return await _auth_manager_for(account).submit_password(payload.password)
+    except TelegramAuthError as error:
+        _raise_telegram_auth_error(error)
+
+
+@app.post(
+    "/api/telegram-accounts/{account_id}/auth/cancel",
+    response_model=TelegramAuthStatusResponse,
+)
+async def cancel_account_auth(
+    account_id: str,
+    _payload: TelegramAuthCancelRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    account = await _get_telegram_account(db, account_id)
+    return await _auth_manager_for(account).cancel()
+
+
+@app.post(
+    "/api/telegram-accounts/{account_id}/bots/sync",
+    response_model=TelegramBotSyncResponse,
+)
+async def sync_account_bots(account_id: str, db: AsyncSession = Depends(get_db)):
+    account = await _get_telegram_account(db, account_id)
+    try:
+        auth_status = await _auth_manager_for(account).get_status()
+    except TelegramAuthError as error:
+        _raise_telegram_auth_error(error)
+    if not auth_status["authorized"]:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "telegram_auth_required", "message": auth_status["message"]},
+        )
+    try:
+        return await TelegramBotSync(db, account.id, account.session_name).run()
+    except TelegramAuthorizationRequired as error:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "telegram_auth_required",
+                "message": str(error),
+            },
+        ) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+
+
+# ============== Legacy default-account authorization ==============
 
 telegram_auth_manager = TelegramAuthManager()
 
@@ -912,28 +1262,33 @@ async def cancel_telegram_auth(_payload: TelegramAuthCancelRequest):
     return await telegram_auth_manager.cancel()
 
 
-ingestion_status = {
-    "running": False,
-    "total": 0,
-    "processed": 0,
-    "message": ""
-}
+ingestion_statuses: dict[str, dict] = {}
+
+
+def _new_operation_status(message: str = "") -> dict:
+    return {"running": False, "total": 0, "processed": 0, "message": message}
 
 
 @app.get("/api/ingestion/status")
-async def get_ingestion_status():
+async def get_ingestion_status(account_id: str = "default"):
     """Get current ingestion status."""
-    return ingestion_status
+    return ingestion_statuses.setdefault(account_id, _new_operation_status("Ready to start"))
 
 
 @app.post("/api/ingestion/start", response_model=IngestionResponse)
-async def start_ingestion(background_tasks: BackgroundTasks):
+async def start_ingestion(
+    background_tasks: BackgroundTasks,
+    account_id: str = "default",
+    db: AsyncSession = Depends(get_db),
+):
     """Start a new ingestion from Telegram."""
+    account = await _get_telegram_account(db, account_id)
+    ingestion_status = ingestion_statuses.setdefault(account_id, _new_operation_status())
     if ingestion_status["running"]:
         raise HTTPException(status_code=409, detail="Ingestion already running")
 
     try:
-        auth_status = await telegram_auth_manager.get_status()
+        auth_status = await _auth_manager_for(account).get_status()
     except TelegramAuthError as error:
         _raise_telegram_auth_error(error)
     if not auth_status["authorized"]:
@@ -946,19 +1301,19 @@ async def start_ingestion(background_tasks: BackgroundTasks):
             },
         )
     
-    background_tasks.add_task(run_ingestion_task)
+    background_tasks.add_task(run_ingestion_task, account.id, account.session_name)
     return IngestionResponse(success=True, message="Ingestion started")
 
 
-async def run_ingestion_task():
+async def run_ingestion_task(account_id: str, session_name: str):
     """Background task for ingestion."""
-    global ingestion_status
+    ingestion_status = ingestion_statuses.setdefault(account_id, _new_operation_status())
     ingestion_status["running"] = True
     ingestion_status["message"] = "Connecting to Telegram..."
     
     async with AsyncSessionLocal() as db:
         try:
-            ingestor = TelegramIngestion(db)
+            ingestor = TelegramIngestion(db, account_id, session_name)
             result = await ingestor.run_ingestion(ingestion_status)
             ingestion_status.update({
                 "running": False,
@@ -973,12 +1328,11 @@ async def run_ingestion_task():
 
 # ============== Member Endpoints ==============
 
-member_fetch_status = {
-    "running": False,
-    "total": 0,
-    "processed": 0,
-    "message": ""
-}
+member_fetch_statuses: dict[str, dict] = {}
+
+
+def _member_status_key(account_id: str, channel_id: int) -> str:
+    return f"{account_id}:{channel_id}"
 
 
 @app.get("/api/channels/{channel_id}/members", response_model=List[MemberResponse])
@@ -1011,23 +1365,30 @@ async def get_members(
 
 
 @app.get("/api/channels/{channel_id}/members/status")
-async def get_member_fetch_status():
+async def get_member_fetch_status(channel_id: int, account_id: str = "default"):
     """Get current member fetch status."""
-    return member_fetch_status
+    return member_fetch_statuses.setdefault(
+        _member_status_key(account_id, channel_id),
+        _new_operation_status(),
+    )
 
 
 @app.post("/api/channels/{channel_id}/members/fetch", response_model=MemberFetchResponse)
 async def fetch_members(
     channel_id: int,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db)
+    account_id: str = "default",
+    db: AsyncSession = Depends(get_db),
 ):
     """Fetch members from Telegram via MTProto and save to DB."""
+    account = await _get_telegram_account(db, account_id)
+    status_key = _member_status_key(account_id, channel_id)
+    member_fetch_status = member_fetch_statuses.setdefault(status_key, _new_operation_status())
     if member_fetch_status["running"]:
         raise HTTPException(status_code=409, detail="Member fetch already running")
 
     try:
-        auth_status = await telegram_auth_manager.get_status()
+        auth_status = await _auth_manager_for(account).get_status()
     except TelegramAuthError as error:
         _raise_telegram_auth_error(error)
     if not auth_status["authorized"]:
@@ -1047,18 +1408,24 @@ async def fetch_members(
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
 
-    background_tasks.add_task(run_member_fetch_task, channel_id)
+    background_tasks.add_task(
+        run_member_fetch_task,
+        channel_id,
+        account.id,
+        account.session_name,
+    )
     return MemberFetchResponse(success=True, message=f"Fetching members for {channel.name}...")
 
 
-async def run_member_fetch_task(channel_id: int):
+async def run_member_fetch_task(channel_id: int, account_id: str, session_name: str):
     """Background task for member fetching."""
-    global member_fetch_status
+    status_key = _member_status_key(account_id, channel_id)
     member_fetch_status = {"running": True, "total": 0, "processed": 0, "message": "Connecting..."}
+    member_fetch_statuses[status_key] = member_fetch_status
 
     async with AsyncSessionLocal() as db:
         try:
-            fetcher = TelegramIngestion(db)
+            fetcher = TelegramIngestion(db, account_id, session_name)
             result = await fetcher.fetch_members(channel_id, member_fetch_status)
             member_fetch_status.update({
                 "running": False,

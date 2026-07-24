@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MemberList from './MemberList.jsx';
+import { AccountBadges } from './AccountBadges.jsx';
 
-function ChannelList({ tags, onTagsChange }) {
+function ChannelList({ tags, onTagsChange, selectedAccountId }) {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -19,6 +20,9 @@ function ChannelList({ tags, onTagsChange }) {
       if (trimmedSearch) {
         params.append('search', trimmedSearch);
       }
+      if (selectedAccountId) {
+        params.append('account_id', selectedAccountId);
+      }
 
       const response = await fetch(`/api/channels?${params}`);
       if (response.ok) {
@@ -34,7 +38,7 @@ function ChannelList({ tags, onTagsChange }) {
 
   useEffect(() => {
     fetchChannels();
-  }, [selectedTags, search]);
+  }, [selectedTags, search, selectedAccountId]);
 
   const toggleTagFilter = (tagId) => {
     setSelectedTags(prev =>
@@ -156,6 +160,7 @@ function ChannelList({ tags, onTagsChange }) {
                   <div className="channel-name-row">
                     <h3 className="channel-name">{channel.name}</h3>
                     <span className="channel-type">{channel.type}</span>
+                    <AccountBadges accounts={channel.accounts} />
                     {channel.username && (
                       <a
                         href={`https://t.me/${channel.username}`}
@@ -273,6 +278,7 @@ function ChannelList({ tags, onTagsChange }) {
       {memberChannel && (
         <MemberList
           channel={memberChannel}
+          accountId={selectedAccountId || memberChannel.accounts?.[0]?.id || 'default'}
           onClose={() => setMemberChannel(null)}
         />
       )}

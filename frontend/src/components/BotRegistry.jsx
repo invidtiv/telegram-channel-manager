@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { AccountBadges } from './AccountBadges.jsx';
 
 const ENVIRONMENTS = ['development', 'staging', 'production', 'testing'];
 const STATUSES = ['active', 'inactive', 'revoked', 'archived'];
 
-function BotRegistry() {
+function BotRegistry({
+  selectedAccountId,
+  selectedAccount,
+  onAccountsChange,
+  onAuthRequired,
+  syncTrigger,
+  onSyncTriggerConsumed,
+}) {
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -15,6 +23,7 @@ function BotRegistry() {
   const [isEditing, setIsEditing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isTelegramSyncing, setIsTelegramSyncing] = useState(false);
   const [inventory, setInventory] = useState(null);
   const [assigning, setAssigning] = useState(null);
   const [assignForm, setAssignForm] = useState({ project: '', username: '', display_name: '', environment: 'development' });
@@ -31,6 +40,7 @@ function BotRegistry() {
       if (filterEnv) params.append('environment', filterEnv);
       if (filterStatus) params.append('status', filterStatus);
       if (filterProject) params.append('project', filterProject);
+      if (selectedAccountId) params.append('account_id', selectedAccountId);
       const res = await fetch(`/api/bots?${params}`);
       if (res.ok) {
         setBots(await res.json());
@@ -69,7 +79,46 @@ function BotRegistry() {
     fetchBots();
     fetchMetadata();
     fetchInventory();
-  }, [search, filterEnv, filterStatus, filterProject]);
+  }, [search, filterEnv, filterStatus, filterProject, selectedAccountId]);
+
+  const handleTelegramBotSync = async () => {
+    if (!selectedAccountId) {
+      setMessage('Select one Telegram account before scanning owned bots.');
+      return;
+    }
+    setIsTelegramSyncing(true);
+    setMessage(`Scanning bots owned by ${selectedAccount?.label || 'the selected account'}…`);
+    try {
+      const response = await fetch(`/api/telegram-accounts/${selectedAccountId}/bots/sync`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        onAuthRequired?.(selectedAccountId);
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.detail?.message || data.detail || 'Telegram bot scan failed');
+      }
+      setMessage(
+        `Telegram scan complete: ${data.found} found, ${data.matched} matched, `
+        + `${data.created} created, ${data.token_missing} need a token.`,
+      );
+      await fetchBots();
+      await onAccountsChange?.();
+    } catch (error) {
+      setMessage(error.message || 'Telegram bot scan failed.');
+    } finally {
+      setIsTelegramSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (syncTrigger > 0) {
+      onSyncTriggerConsumed?.();
+      handleTelegramBotSync();
+    }
+  }, [syncTrigger]);
 
   const handleScan = async () => {
     setIsScanning(true);
@@ -169,7 +218,7 @@ function BotRegistry() {
 
   const startEdit = (bot) => {
     setForm({
-      token: bot.token,
+      token: '',
       username: bot.username,
       display_name: bot.display_name || '',
       description: bot.description || '',
@@ -243,7 +292,7 @@ function BotRegistry() {
         setMessage(`BotFather import: ${result.added} added, ${result.skipped} skipped, ${result.deleted || 0} deleted.`);
         setIsImporting(false);
         fetchBots();
-        fetchProjects();
+        fetchMetadata();
       } else {
         setMessage(result.detail || 'BotFather import failed.');
       }
@@ -291,7 +340,13 @@ function BotRegistry() {
           <div className="form-grid">
             <label>
               Token
-              <input type="text" value={form.token} onChange={(e) => setForm({ ...form, token: e.target.value })} required />
+              <input
+                type="password"
+                value={form.token}
+                onChange={(e) => setForm({ ...form, token: e.target.value })}
+                placeholder={selectedBot?.has_token ? 'Leave blank to keep current token' : 'Optional — fill in later'}
+                autoComplete="off"
+              />
             </label>
             <label>
               Username
@@ -370,6 +425,14 @@ function BotRegistry() {
             <button className="btn-secondary" onClick={handleScan} disabled={isScanning}>
               {isScanning ? 'Scanning...' : 'Scan Tokens'}
             </button>
+            <button
+              className="btn-secondary"
+              onClick={handleTelegramBotSync}
+              disabled={isTelegramSyncing || !selectedAccountId}
+              title={!selectedAccountId ? 'Select one account first' : 'Query bots.getAdminedBots'}
+            >
+              {isTelegramSyncing ? 'Scanning Telegram…' : 'Scan Owned Bots'}
+            </button>
             <button className="btn-primary" onClick={startCreate}>Add Bot</button>
           </div>
         </div>
@@ -422,10 +485,14 @@ function BotRegistry() {
                     <h4 className="bot-name">{bot.display_name || bot.username}</h4>
                     <span className="bot-username">@{bot.username}</span>
                     <span className="bot-environment">{bot.environment}</span>
+                    <AccountBadges accounts={bot.accounts} />
+                    {!bot.has_token && <span className="token-needed-badge">Token needed</span>}
                   </div>
                   <div className="bot-meta">
                     <span className="meta-item">Project: <strong>{bot.project || '—'}</strong></span>
-                    <span className="meta-item">Token: <code>{bot.token.slice(0, bot.token.indexOf(':') + 4)}...{bot.token.slice(-4)}</code></span>
+                    <span className="meta-item">
+                      Token: <code>{bot.has_token ? bot.token_preview : 'not stored'}</code>
+                    </span>
                   </div>
                   {bot.description && <p className="bot-description">{bot.description}</p>}
                   {bot.notes && <p className="bot-notes">{bot.notes}</p>}

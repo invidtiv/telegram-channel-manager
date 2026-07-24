@@ -33,6 +33,44 @@ class Channel(Base):
     
     # Relationships
     tags = relationship("Tag", secondary=channel_tags, back_populates="channels")
+    account_links = relationship("ChannelAccount", back_populates="channel", cascade="all, delete-orphan")
+
+
+class TelegramAccount(Base):
+    """Independently authenticated Telegram user account."""
+    __tablename__ = 'telegram_accounts'
+
+    id = Column(String, primary_key=True)
+    label = Column(String, nullable=False)
+    country_code = Column(String(2), default="")
+    phone_hint = Column(String, default="")
+    session_name = Column(String, nullable=False, unique=True)
+    telegram_user_id = Column(BigInteger, nullable=True, unique=True)
+    username = Column(String, nullable=True)
+    display_name = Column(String, default="")
+    is_default = Column(Boolean, default=False, nullable=False)
+    last_channel_scan_at = Column(DateTime, nullable=True)
+    last_bot_scan_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    channel_links = relationship("ChannelAccount", back_populates="account", cascade="all, delete-orphan")
+    bot_links = relationship("BotAccount", back_populates="account", cascade="all, delete-orphan")
+
+
+class ChannelAccount(Base):
+    """Records that an account can access a canonical channel/group."""
+    __tablename__ = 'channel_accounts'
+    __table_args__ = (
+        UniqueConstraint('account_id', 'channel_id', name='uq_account_channel'),
+    )
+
+    account_id = Column(String, ForeignKey('telegram_accounts.id'), primary_key=True)
+    channel_id = Column(Integer, ForeignKey('channels.id'), primary_key=True)
+    last_seen_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    account = relationship("TelegramAccount", back_populates="channel_links")
+    channel = relationship("Channel", back_populates="account_links")
 
 
 class Tag(Base):
@@ -77,6 +115,7 @@ class Bot(Base):
 
     id = Column(String, primary_key=True)
     token = Column(String, nullable=False)
+    telegram_bot_id = Column(BigInteger, nullable=True, unique=True, index=True)
     username = Column(String, nullable=False)
     display_name = Column(String, default="")
     description = Column(String, default="")
@@ -96,6 +135,22 @@ class Bot(Base):
     # Relationships
     commands = relationship("BotCommand", back_populates="bot", cascade="all, delete-orphan")
     history = relationship("BotHistory", back_populates="bot", cascade="all, delete-orphan")
+    account_links = relationship("BotAccount", back_populates="bot", cascade="all, delete-orphan")
+
+
+class BotAccount(Base):
+    """Records bot ownership by a Telegram account."""
+    __tablename__ = 'bot_accounts'
+    __table_args__ = (
+        UniqueConstraint('account_id', 'bot_id', name='uq_account_bot'),
+    )
+
+    account_id = Column(String, ForeignKey('telegram_accounts.id'), primary_key=True)
+    bot_id = Column(String, ForeignKey('bots.id'), primary_key=True)
+    last_seen_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    account = relationship("TelegramAccount", back_populates="bot_links")
+    bot = relationship("Bot", back_populates="account_links")
 
 
 class BotCommand(Base):

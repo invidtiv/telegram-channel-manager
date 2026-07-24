@@ -62,6 +62,7 @@ class ChannelResponse(ChannelBase):
     created_at: datetime
     updated_at: datetime
     tags: List[TagResponse] = []
+    accounts: List['TelegramAccountBadge'] = []
 
 
 # ============== Ingestion Schemas ==============
@@ -122,6 +123,70 @@ class TelegramAuthStatusResponse(BaseModel):
     ]
     message: str
     expires_in: Optional[int] = None
+
+
+class TelegramAccountCreate(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+    country_code: str = Field(default="", max_length=2)
+
+    @field_validator("label")
+    @classmethod
+    def normalize_label(cls, value):
+        return value.strip()
+
+    @field_validator("country_code")
+    @classmethod
+    def normalize_country_code(cls, value):
+        value = value.strip().upper()
+        if value and (len(value) != 2 or not value.isalpha()):
+            raise ValueError("country_code must be a two-letter code")
+        return value
+
+
+class TelegramAccountUpdate(BaseModel):
+    label: Optional[str] = Field(default=None, min_length=1, max_length=80)
+    country_code: Optional[str] = Field(default=None, max_length=2)
+
+    @field_validator("label")
+    @classmethod
+    def normalize_optional_label(cls, value):
+        return value.strip() if value is not None else value
+
+    @field_validator("country_code")
+    @classmethod
+    def normalize_optional_country_code(cls, value):
+        if value is None:
+            return value
+        value = value.strip().upper()
+        if value and (len(value) != 2 or not value.isalpha()):
+            raise ValueError("country_code must be a two-letter code")
+        return value
+
+
+class TelegramAccountBadge(BaseModel):
+    id: str
+    label: str
+    country_code: str = ""
+
+
+class TelegramAccountResponse(TelegramAccountBadge):
+    username: Optional[str] = None
+    display_name: str = ""
+    phone_hint: str = ""
+    telegram_user_id: Optional[int] = None
+    is_default: bool = False
+    authorized: bool = False
+    last_channel_scan_at: Optional[datetime] = None
+    last_bot_scan_at: Optional[datetime] = None
+    created_at: datetime
+
+
+class TelegramBotSyncResponse(BaseModel):
+    found: int = 0
+    matched: int = 0
+    created: int = 0
+    updated: int = 0
+    token_missing: int = 0
 
 
 # ============== Member Schemas ==============
@@ -214,7 +279,7 @@ class BotSettings(BaseModel):
 # ============== Bot Schemas ==============
 
 class BotBase(BaseModel):
-    token: str
+    token: str = ""
     username: str
     display_name: Optional[str] = ""
     description: Optional[str] = ""
@@ -251,10 +316,25 @@ class BotUpdate(BaseModel):
     settings: Optional[BotSettings] = None
 
 
-class BotResponse(BotBase):
-    model_config = ConfigDict(from_attributes=True)
-
+class BotResponse(BaseModel):
     id: str
+    telegram_bot_id: Optional[int] = None
+    username: str
+    display_name: str = ""
+    description: str = ""
+    about_text: str = ""
+    avatar_url: str = ""
+    project: str = ""
+    environment: str = "development"
+    status: str = "active"
+    tags: List[str] = []
+    use_case: str = ""
+    location: str = ""
+    notes: str = ""
+    settings: Optional[BotSettings] = None
+    has_token: bool = False
+    token_preview: str = ""
+    accounts: List[TelegramAccountBadge] = []
     created_at: datetime
     updated_at: datetime
     commands: List[BotCommandResponse] = []

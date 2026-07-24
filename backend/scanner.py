@@ -431,7 +431,7 @@ async def build_inventory(db: AsyncSession) -> Dict[str, Any]:
         registered_bot = registry_by_fingerprint.get(group["token_fingerprint"])
         tokens.append({
             "token_fingerprint": group["token_fingerprint"],
-            "token": group["token"],
+            "token": None,
             "bot_id": group["bot_id"],
             "status": "registered_found" if registered_bot else "unassigned_found",
             "registry_entry_id": registered_bot.id if registered_bot else "",
