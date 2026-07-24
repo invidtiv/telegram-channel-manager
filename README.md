@@ -95,8 +95,8 @@
 ### 1. Initial Setup
 
 1. **Start both backend and frontend** servers
-2. **Authenticate with Telegram** - Follow console prompts on first ingestion
-3. **Access the web UI** - Open http://localhost:3000
+2. **Access the web UI** - Open http://localhost:3000
+3. **Authenticate with Telegram** - The Ingestion tab requests your phone number, verification code, and two-step password when required
 
 ### 2. Ingesting Channels
 
@@ -352,6 +352,16 @@ DELETE /api/tags/{tag_id}
 
 ### Ingestion
 
+#### Telegram Authorization Status
+```http
+GET /api/telegram-auth/status
+```
+
+When the persisted session is no longer authorized, the frontend uses the
+`request-code`, `submit-code`, and optional `submit-password` endpoints under
+`/api/telegram-auth`. Authorization inputs are handled server-side and are not
+persisted by the application.
+
 #### Start Ingestion
 ```http
 POST /api/ingestion/start
@@ -428,7 +438,7 @@ GET /api/health
 ## 🛡️ Security Best Practices
 
 - ✅ **Environment Variables** - API keys in `.env` (never committed)
-- ✅ **Session Encryption** - Telegram session files are encrypted
+- ✅ **Server-side Sessions** - Telegram session files stay on the server and are excluded from version control
 - ✅ **CORS Configuration** - Restricted to allowed origins
 - ✅ **XSS Protection** - React's built-in sanitization
 - ✅ **SQL Injection Prevention** - Parameterized queries via SQLAlchemy
@@ -443,12 +453,9 @@ GET /api/health
 **Problem**: "User not authorized" error
 
 **Solution**:
-```bash
-cd backend
-python run.py
-# Follow the authentication prompts
-# A .session file will be created for future runs
-```
+Open the **Ingestion** tab. Enter the full international phone number, the
+verification code sent by Telegram, and the account's two-step verification
+password if prompted. The refreshed `.session` file is reused for future runs.
 
 ### CORS Errors
 

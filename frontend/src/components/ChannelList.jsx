@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import MemberList from './MemberList.jsx';
 
 function ChannelList({ tags, onTagsChange }) {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [memberChannel, setMemberChannel] = useState(null);
 
   const fetchChannels = async () => {
     setLoading(true);
@@ -13,8 +15,9 @@ function ChannelList({ tags, onTagsChange }) {
       if (selectedTags.length > 0) {
         params.append('tag_ids', selectedTags.join(','));
       }
-      if (search) {
-        params.append('search', search);
+      const trimmedSearch = search.trim();
+      if (trimmedSearch) {
+        params.append('search', trimmedSearch);
       }
 
       const response = await fetch(`/api/channels?${params}`);
@@ -98,7 +101,7 @@ function ChannelList({ tags, onTagsChange }) {
             </svg>
             <input
               type="text"
-              placeholder="Search channels..."
+              placeholder="Search names, IDs, notes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -211,7 +214,31 @@ function ChannelList({ tags, onTagsChange }) {
                     )}
                   </div>
 
-                  <div className="channel-id">ID: {channel.id} • Bot: {channel.bot_chat_id}</div>
+                  <div className="channel-id-row">
+                    <span className="channel-id">ID: {channel.id} • Bot: {channel.bot_chat_id}</span>
+                    {(channel.type === 'group' || channel.type === 'supergroup') && (
+                      <button
+                        className="btn btn-members"
+                        onClick={() => setMemberChannel(channel)}
+                        title="View members"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Members
+                      </button>
+                    )}
+                  </div>
+
+                  {(channel.notes || channel.about)?.trim() && (
+                    <div className="channel-notes">
+                      <span className="channel-notes-label">Notes</span>
+                      <p className="channel-notes-text">{(channel.notes || channel.about).trim()}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="channel-tags-section">
@@ -242,6 +269,12 @@ function ChannelList({ tags, onTagsChange }) {
             </div>
           ))}
         </div>
+      )}
+      {memberChannel && (
+        <MemberList
+          channel={memberChannel}
+          onClose={() => setMemberChannel(null)}
+        />
       )}
     </div>
   );

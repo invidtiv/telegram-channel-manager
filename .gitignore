@@ -110,6 +110,14 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Output data (contains personal Telegram data)
+src/output/
+src/*.log
+botfather*.json
+
+# Docker
+docker-compose.override.yml
+
 # Temporary files
 *.tmp
 *.temp

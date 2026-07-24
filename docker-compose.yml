@@ -1,0 +1,28 @@
+services:
+  personal-telegram:
+    build: .
+    container_name: personal-telegram
+    ports:
+      - "127.0.0.1:3060:8000"
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./backend/list_channels_session.session:/app/backend/list_channels_session.session
+      - /home/bsdev:/host/home/bsdev:ro
+      - /etc:/host/etc:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - config/.env
+    environment:
+      - TGSECRETS_HOST_HOME=/home/bsdev
+      - TGSECRETS_MOUNT_HOME=/host/home/bsdev
+      - TGSECRETS_HOST_ETC=/etc
+      - TGSECRETS_MOUNT_ETC=/host/etc
+      - TGSECRETS_ENABLE_DOCKER_SCAN=true
+    group_add:
+      - "112"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

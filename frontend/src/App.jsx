@@ -3,6 +3,7 @@ import './App.css';
 import ChannelList from './components/ChannelList.jsx';
 import TagManager from './components/TagManager.jsx';
 import IngestionPanel from './components/IngestionPanel.jsx';
+import BotRegistry from './components/BotRegistry.jsx';
 
 function App() {
   const [activeTab, setActiveTab] = useState('channels');
@@ -55,6 +56,15 @@ function App() {
               Channels
             </button>
             <button
+              className={`nav-tab ${activeTab === 'bots' ? 'active' : ''}`}
+              onClick={() => setActiveTab('bots')}
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.72v1.78h3c.55 0 1 .45 1 1v7c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1V8.5c0-.55.45-1 1-1h3V5.72c-.6-.34-1-.98-1-1.72a2 2 0 0 1 2-2h1zm-1 12h2v2h-2v-2zm-4 0h2v2H7v-2zm8 0h2v2h-2v-2z" />
+              </svg>
+              Bots
+            </button>
+            <button
               className={`nav-tab ${activeTab === 'tags' ? 'active' : ''}`}
               onClick={() => setActiveTab('tags')}
             >
@@ -82,6 +92,9 @@ function App() {
             tags={tags}
             onTagsChange={handleRefresh}
           />
+        )}
+        {activeTab === 'bots' && (
+          <BotRegistry />
         )}
         {activeTab === 'tags' && (
           <TagManager

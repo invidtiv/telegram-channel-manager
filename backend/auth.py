@@ -39,7 +39,8 @@ async def authenticate():
     print("=" * 50)
     print()
 
-    client = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
+    session_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), SESSION_NAME)
+    client = TelegramClient(session_path, int(API_ID), API_HASH)
     await client.connect()
 
     if await client.is_user_authorized():

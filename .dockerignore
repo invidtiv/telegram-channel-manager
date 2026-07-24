@@ -1,0 +1,12 @@
+venv/
+frontend/node_modules/
+.git/
+*.session
+backend/data/
+**/__pycache__/
+src/
+config/.env
+*.log
+*.md
+LICENSE
+architecture-description.txt
