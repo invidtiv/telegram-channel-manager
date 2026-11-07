@@ -2,8 +2,8 @@ services:
   personal-telegram:
     build: .
     container_name: personal-telegram
-    ports:
-      - "127.0.0.1:3060:8000"
+    expose:
+      - "8000"
     volumes:
       - ./backend/data:/app/backend/data
       - ./backend/list_channels_session.session:/app/backend/list_channels_session.session
@@ -26,3 +26,15 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  auth-gateway:
+    build: ./auth
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3060:8080"
+      - "100.115.155.120:3060:8080"
+    environment:
+      AUTH_CONFIG_FILE: /run/secrets/auth.json
+    volumes:
+      - /home/bsdev/.config/private-telegram-auth/personal-telegram.json:/run/secrets/auth.json:ro
+    depends_on:
+      - personal-telegram
